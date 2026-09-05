@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generatePuzzle } from '../utils/generator'
 import { isValidPlacement } from '../utils/solver'
+import { loadGame, saveGame } from '../utils/storage'
 import type { Board, Difficulty } from '../utils/types'
 
 export interface CellPosition {
@@ -45,19 +46,47 @@ function cloneSnapshot(s: Snapshot): Snapshot {
 }
 
 export function useSudoku(initialDifficulty: Difficulty = 'medium') {
-  const [difficulty, setDifficulty] = useState<Difficulty>(initialDifficulty)
-  const [{ puzzle, solution }, setGame] = useState(() => generatePuzzle(initialDifficulty))
+  // Computed once, on first render only: either a previously saved game, or a fresh puzzle.
+  const [initial] = useState(() => {
+    const saved = loadGame()
+    if (saved) {
+      return {
+        difficulty: saved.difficulty,
+        puzzle: saved.puzzle,
+        solution: saved.solution,
+        board: saved.board,
+        notes: saved.notes,
+        hints: saved.hints,
+        seconds: saved.seconds,
+        hintsUsed: saved.hintsUsed,
+      }
+    }
+    const game = generatePuzzle(initialDifficulty)
+    return {
+      difficulty: initialDifficulty,
+      puzzle: game.puzzle,
+      solution: game.solution,
+      board: cloneBoard(game.puzzle),
+      notes: createEmptyNotes(),
+      hints: createEmptyHints(),
+      seconds: 0,
+      hintsUsed: 0,
+    }
+  })
 
-  const [state, setState] = useState<Snapshot>(() => ({
-    board: cloneBoard(puzzle),
-    notes: createEmptyNotes(),
-    hints: createEmptyHints(),
-  }))
+  const [difficulty, setDifficulty] = useState<Difficulty>(initial.difficulty)
+  const [{ puzzle, solution }, setGame] = useState({ puzzle: initial.puzzle, solution: initial.solution })
+
+  const [state, setState] = useState<Snapshot>({
+    board: initial.board,
+    notes: initial.notes,
+    hints: initial.hints,
+  })
   const { board, notes, hints } = state
 
   const [selected, setSelected] = useState<CellPosition | null>(null)
   const [isNotesMode, setIsNotesMode] = useState(false)
-  const [hintsUsed, setHintsUsed] = useState(0)
+  const [hintsUsed, setHintsUsed] = useState(initial.hintsUsed)
 
   /** The cell that most recently received a correct entry - briefly animated, then cleared. */
   const [celebrate, setCelebrate] = useState<CellPosition | null>(null)
@@ -67,8 +96,9 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
   const [future, setFuture] = useState<Snapshot[]>([])
 
   // Timer.
-  const [seconds, setSeconds] = useState(0)
+  const [seconds, setSeconds] = useState(initial.seconds)
   const [gameId, setGameId] = useState(0)
+  const isFirstTimerRun = useRef(true)
 
   /** Original puzzle clues - never editable. */
   const isGiven = useCallback(
@@ -101,7 +131,11 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
   }, [board, hasConflict])
 
   useEffect(() => {
-    setSeconds(0)
+    if (isFirstTimerRun.current) {
+      isFirstTimerRun.current = false // don't reset on mount - keep any restored time
+    } else {
+      setSeconds(0)
+    }
     if (isSolved) return
     const id = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(id)
@@ -114,6 +148,21 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     const id = setTimeout(() => setCelebrate(null), 450)
     return () => clearTimeout(id)
   }, [celebrate])
+
+  // Persist progress so refreshing the page resumes the same game.
+  useEffect(() => {
+    saveGame({
+      version: 1,
+      difficulty,
+      puzzle,
+      solution,
+      board,
+      notes,
+      hints,
+      seconds,
+      hintsUsed,
+    })
+  }, [difficulty, puzzle, solution, board, notes, hints, seconds, hintsUsed])
 
   const selectCell = useCallback((row: number, col: number) => {
     setSelected({ row, col })

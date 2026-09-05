@@ -5,6 +5,9 @@ export type Board = number[][]
 
 export type Difficulty = 'beginner' | 'easy' | 'medium' | 'hard' | 'expert'
 
+/** Single source of truth for difficulty order, used by every UI that lists difficulties. */
+export const ALL_DIFFICULTIES: Difficulty[] = ['beginner', 'easy', 'medium', 'hard', 'expert']
+
 /** Number of filled (given) cells removed for each difficulty. Out of 81 total cells. */
 export const DIFFICULTY_CLUES: Record<Difficulty, number> = {
   beginner: 45, // very easy, lots of clues to lean on

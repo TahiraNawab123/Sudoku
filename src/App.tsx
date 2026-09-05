@@ -1,11 +1,10 @@
 import { useEffect } from 'react'
 import Board from './components/Board'
 import Keypad from './components/Keypad'
+import WinModal from './components/WinModal'
 import { useSudoku } from './hooks/useSudoku'
 import { formatTime } from './utils/formatTime'
-import type { Difficulty } from './utils/types'
-
-const DIFFICULTIES: Difficulty[] = ['beginner', 'easy', 'medium', 'hard', 'expert']
+import { ALL_DIFFICULTIES } from './utils/types'
 
 function App() {
   const {
@@ -34,7 +33,7 @@ function App() {
   } = useSudoku('medium')
 
   // Physical keyboard support: 1-9 to fill/note, Backspace/Delete/0 to clear,
-  // Ctrl Z to undo, Ctrl/Cmd+Shift+Z (or Ctrl+Y) to redo, N to toggle notes mode.
+  // Ctrl/Cmd+Z to undo, Ctrl/Cmd+Shift+Z (or Ctrl+Y) to redo, N to toggle notes mode.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const isModifierHeld = e.metaKey || e.ctrlKey
@@ -79,7 +78,7 @@ function App() {
 
       <div className="flex flex-wrap items-center justify-center gap-4">
         <div className="flex gap-2">
-          {DIFFICULTIES.map((d) => (
+          {ALL_DIFFICULTIES.map((d) => (
             <button
               key={d}
               type="button"
@@ -164,9 +163,12 @@ function App() {
       <Keypad board={board} onNumber={setValue} onErase={clearCell} />
 
       {isSolved && (
-        <p className="font-display text-xl font-semibold text-accent">
-          🎉 Solved in {formatTime(seconds)}! Nice work.
-        </p>
+        <WinModal
+          seconds={seconds}
+          difficulty={difficulty}
+          hintsUsed={hintsUsed}
+          onNewGame={newGame}
+        />
       )}
 
       <button
