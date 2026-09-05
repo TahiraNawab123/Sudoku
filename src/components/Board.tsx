@@ -1,0 +1,51 @@
+import Cell from './Cell'
+import type { CellPosition } from '../hooks/useSudoku'
+import type { Board as BoardType } from '../utils/types'
+
+interface BoardProps {
+  board: BoardType
+  selected: CellPosition | null
+  isGiven: (row: number, col: number) => boolean
+  hasConflict: (row: number, col: number) => boolean
+  onSelect: (row: number, col: number) => void
+}
+
+function isPeerOf(selected: CellPosition | null, row: number, col: number): boolean {
+  if (!selected) return false
+  if (selected.row === row && selected.col === col) return false
+
+  const sameRow = selected.row === row
+  const sameCol = selected.col === col
+  const sameBox =
+    Math.floor(selected.row / 3) === Math.floor(row / 3) &&
+    Math.floor(selected.col / 3) === Math.floor(col / 3)
+
+  return sameRow || sameCol || sameBox
+}
+
+function Board({ board, selected, isGiven, hasConflict, onSelect }: BoardProps) {
+  const selectedValue = selected ? board[selected.row][selected.col] : 0
+
+  return (
+    <div className="grid w-full max-w-[min(90vw,32rem)] grid-cols-9 border-2 border-grid/70">
+      {board.map((rowValues, row) =>
+        rowValues.map((value, col) => (
+          <Cell
+            key={`${row}-${col}`}
+            value={value}
+            row={row}
+            col={col}
+            isGiven={isGiven(row, col)}
+            isSelected={selected?.row === row && selected?.col === col}
+            isPeer={isPeerOf(selected, row, col)}
+            isSameValue={selectedValue !== 0 && value === selectedValue}
+            hasConflict={hasConflict(row, col)}
+            onSelect={onSelect}
+          />
+        )),
+      )}
+    </div>
+  )
+}
+
+export default Board
