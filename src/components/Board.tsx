@@ -1,12 +1,15 @@
 import Cell from './Cell'
-import type { CellPosition } from '../hooks/useSudoku'
+import type { CellPosition, Notes } from '../hooks/useSudoku'
 import type { Board as BoardType } from '../utils/types'
 
 interface BoardProps {
   board: BoardType
+  notes: Notes
   selected: CellPosition | null
   isGiven: (row: number, col: number) => boolean
+  isHint: (row: number, col: number) => boolean
   hasConflict: (row: number, col: number) => boolean
+  isCelebrating: (row: number, col: number) => boolean
   onSelect: (row: number, col: number) => void
 }
 
@@ -23,7 +26,7 @@ function isPeerOf(selected: CellPosition | null, row: number, col: number): bool
   return sameRow || sameCol || sameBox
 }
 
-function Board({ board, selected, isGiven, hasConflict, onSelect }: BoardProps) {
+function Board({ board, notes, selected, isGiven, isHint, hasConflict, isCelebrating, onSelect }: BoardProps) {
   const selectedValue = selected ? board[selected.row][selected.col] : 0
 
   return (
@@ -35,11 +38,14 @@ function Board({ board, selected, isGiven, hasConflict, onSelect }: BoardProps) 
             value={value}
             row={row}
             col={col}
+            notes={notes[row][col]}
             isGiven={isGiven(row, col)}
+            isHint={isHint(row, col)}
             isSelected={selected?.row === row && selected?.col === col}
             isPeer={isPeerOf(selected, row, col)}
             isSameValue={selectedValue !== 0 && value === selectedValue}
             hasConflict={hasConflict(row, col)}
+            isCelebrating={isCelebrating(row, col)}
             onSelect={onSelect}
           />
         )),

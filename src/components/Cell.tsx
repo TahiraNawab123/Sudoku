@@ -2,11 +2,14 @@ interface CellProps {
   value: number
   row: number
   col: number
+  notes: number[]
   isGiven: boolean
+  isHint: boolean
   isSelected: boolean
   isPeer: boolean
   isSameValue: boolean
   hasConflict: boolean
+  isCelebrating: boolean
   onSelect: (row: number, col: number) => void
 }
 
@@ -14,11 +17,14 @@ function Cell({
   value,
   row,
   col,
+  notes,
   isGiven,
+  isHint,
   isSelected,
   isPeer,
   isSameValue,
   hasConflict,
+  isCelebrating,
   onSelect,
 }: CellProps) {
   // Thicker borders every 3 cells to mark the 3x3 boxes.
@@ -34,9 +40,11 @@ function Cell({
 
   const textColor = hasConflict
     ? 'text-red-600'
-    : isGiven
-      ? 'text-ink'
-      : 'text-accent'
+    : isHint
+      ? 'text-blue-600'
+      : isGiven
+        ? 'text-ink'
+        : 'text-accent'
 
   return (
     <button
@@ -44,7 +52,7 @@ function Cell({
       onClick={() => onSelect(row, col)}
       aria-label={`Row ${row + 1}, column ${col + 1}${value ? `, value ${value}` : ', empty'}`}
       className={[
-        'flex aspect-square w-full items-center justify-center',
+        'relative flex aspect-square w-full items-center justify-center',
         'font-body text-lg sm:text-xl',
         'border-grid/40 transition-colors duration-100',
         borderTop,
@@ -53,10 +61,24 @@ function Cell({
         borderBottom,
         background,
         textColor,
-        isGiven ? 'font-semibold' : 'font-normal',
+        isGiven || isHint ? 'font-semibold' : 'font-normal',
+        isCelebrating ? 'z-10 animate-cellPop ring-2 ring-inset ring-accent' : '',
       ].join(' ')}
     >
-      {value !== 0 ? value : ''}
+      {value !== 0 ? (
+        value
+      ) : notes.length > 0 ? (
+        <span className="grid h-full w-full grid-cols-3 grid-rows-3 p-0.5">
+          {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => (
+            <span
+              key={n}
+              className="flex items-center justify-center text-[9px] leading-none text-ink/45 sm:text-[10px]"
+            >
+              {notes.includes(n) ? n : ''}
+            </span>
+          ))}
+        </span>
+      ) : null}
     </button>
   )
 }

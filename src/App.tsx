@@ -5,29 +5,36 @@ import { useSudoku } from './hooks/useSudoku'
 import { formatTime } from './utils/formatTime'
 import type { Difficulty } from './utils/types'
 
-const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert']
+const DIFFICULTIES: Difficulty[] = ['beginner', 'easy', 'medium', 'hard', 'expert']
 
 function App() {
   const {
     board,
+    notes,
     difficulty,
     selected,
     seconds,
+    isNotesMode,
+    hintsUsed,
     isGiven,
+    isHint,
     hasConflict,
+    isCelebrating,
     isSolved,
     canUndo,
     canRedo,
     selectCell,
     setValue,
     clearCell,
+    toggleNotesMode,
+    useHint,
     undo,
     redo,
     newGame,
   } = useSudoku('medium')
 
-  // Physical keyboard support: 1-9 to fill, Backspace/Delete/0 to clear,
-  // Ctrl/Cmd+Z to undo, Ctrl/Cmd+Shift+Z (or Ctrl+Y) to redo.
+  // Physical keyboard support: 1-9 to fill/note, Backspace/Delete/0 to clear,
+  // Ctrl Z to undo, Ctrl/Cmd+Shift+Z (or Ctrl+Y) to redo, N to toggle notes mode.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const isModifierHeld = e.metaKey || e.ctrlKey
@@ -43,6 +50,10 @@ function App() {
         redo()
         return
       }
+      if (!isModifierHeld && e.key.toLowerCase() === 'n') {
+        toggleNotesMode()
+        return
+      }
 
       if (e.key >= '1' && e.key <= '9') {
         setValue(Number(e.key))
@@ -53,7 +64,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [setValue, clearCell, undo, redo])
+  }, [setValue, clearCell, undo, redo, toggleNotesMode])
 
   return (
     <div className="flex min-h-screen flex-col items-center gap-6 px-4 py-10">
@@ -66,7 +77,7 @@ function App() {
         </p>
       </header>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-center gap-4">
         <div className="flex gap-2">
           {DIFFICULTIES.map((d) => (
             <button
@@ -92,13 +103,16 @@ function App() {
 
       <Board
         board={board}
+        notes={notes}
         selected={selected}
         isGiven={isGiven}
+        isHint={isHint}
         hasConflict={hasConflict}
+        isCelebrating={isCelebrating}
         onSelect={selectCell}
       />
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
           onClick={undo}
@@ -124,6 +138,26 @@ function App() {
           ].join(' ')}
         >
           ↪ Redo
+        </button>
+        <button
+          type="button"
+          onClick={toggleNotesMode}
+          aria-pressed={isNotesMode}
+          className={[
+            'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
+            isNotesMode
+              ? 'border-accent bg-accent text-white'
+              : 'border-grid/30 text-ink/70 hover:border-accent hover:bg-accentSoft',
+          ].join(' ')}
+        >
+          ✏️ Notes {isNotesMode ? 'On' : 'Off'}
+        </button>
+        <button
+          type="button"
+          onClick={useHint}
+          className="rounded-lg border border-grid/30 px-4 py-2 text-sm font-medium text-ink/70 transition-colors hover:border-accent hover:bg-accentSoft"
+        >
+          💡 Hint {hintsUsed > 0 ? `(${hintsUsed})` : ''}
         </button>
       </div>
 

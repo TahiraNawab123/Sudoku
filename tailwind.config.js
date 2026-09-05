@@ -14,6 +14,16 @@ export default {
         display: ['"Fraunces"', 'serif'],
         body: ['"Inter"', 'sans-serif'],
       },
+      keyframes: {
+        cellPop: {
+          '0%': { transform: 'scale(1)' },
+          '40%': { transform: 'scale(1.28)' },
+          '100%': { transform: 'scale(1)' },
+        },
+      },
+      animation: {
+        cellPop: 'cellPop 0.4s ease-out',
+      },
     },
   },
   plugins: [],

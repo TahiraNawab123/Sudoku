@@ -3,11 +3,12 @@
  */
 export type Board = number[][]
 
-export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert'
+export type Difficulty = 'beginner' | 'easy' | 'medium' | 'hard' | 'expert'
 
 /** Number of filled (given) cells removed for each difficulty. Out of 81 total cells. */
 export const DIFFICULTY_CLUES: Record<Difficulty, number> = {
-  easy: 40, // 40 clues left on the board
+  beginner: 45, // very easy, lots of clues to lean on
+  easy: 38,
   medium: 32,
   hard: 28,
   expert: 24,
