@@ -59,18 +59,41 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
   // Computed once, on first render only: either a previously saved game, or a fresh puzzle.
   const [initial] = useState(() => {
     const saved = loadGame()
-    if (saved) {
+    const savedGame =
+      saved &&
+      typeof saved === 'object' &&
+      'difficulty' in saved &&
+      'puzzle' in saved &&
+      'solution' in saved &&
+      'board' in saved &&
+      'notes' in saved &&
+      'hints' in saved
+        ? (saved as {
+            difficulty: Difficulty
+            puzzle: Board
+            solution: Board
+            board: Board
+            notes: Notes
+            hints: HintGrid
+            seconds?: number
+            hintsUsed?: number
+            score?: number
+            mistakes?: number
+          })
+        : null
+
+    if (savedGame) {
       return {
-        difficulty: saved.difficulty,
-        puzzle: saved.puzzle,
-        solution: saved.solution,
-        board: saved.board,
-        notes: saved.notes,
-        hints: saved.hints,
-        seconds: saved.seconds,
-        hintsUsed: saved.hintsUsed,
-        score: saved.score,
-        mistakes: saved.mistakes,
+        difficulty: savedGame.difficulty,
+        puzzle: savedGame.puzzle,
+        solution: savedGame.solution,
+        board: savedGame.board,
+        notes: savedGame.notes,
+        hints: savedGame.hints,
+        seconds: savedGame.seconds ?? 0,
+        hintsUsed: savedGame.hintsUsed ?? 0,
+        score: savedGame.score ?? 0,
+        mistakes: savedGame.mistakes ?? 0,
       }
     }
     const game = generatePuzzle(initialDifficulty)
@@ -171,7 +194,7 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
   // Persist progress so refreshing the page resumes the same game.
   useEffect(() => {
     saveGame({
-      version: 2,
+      version: 1,
       difficulty,
       puzzle,
       solution,
