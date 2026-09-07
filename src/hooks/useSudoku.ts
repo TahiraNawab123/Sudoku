@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { generatePuzzle } from '../utils/generator'
-import { isValidPlacement } from '../utils/solver'
 import { loadGame, saveGame } from '../utils/storage'
 import type { Board, Difficulty } from '../utils/types'
 
@@ -8,6 +7,9 @@ export interface CellPosition {
   row: number
   col: number
 }
+
+const POINTS_PER_CORRECT_ENTRY = 145
+const MAX_MISTAKES = 3
 
 /** notes[row][col] is a sorted list of candidate numbers (1-9) pencilled into that cell. */
 export type Notes = number[][][]
@@ -19,6 +21,8 @@ interface Snapshot {
   board: Board
   notes: Notes
   hints: HintGrid
+  score: number
+  mistakes: number
 }
 
 function cloneBoard(board: Board): Board {
@@ -42,7 +46,13 @@ function cloneHints(hints: HintGrid): HintGrid {
 }
 
 function cloneSnapshot(s: Snapshot): Snapshot {
-  return { board: cloneBoard(s.board), notes: cloneNotes(s.notes), hints: cloneHints(s.hints) }
+  return {
+    board: cloneBoard(s.board),
+    notes: cloneNotes(s.notes),
+    hints: cloneHints(s.hints),
+    score: s.score,
+    mistakes: s.mistakes,
+  }
 }
 
 export function useSudoku(initialDifficulty: Difficulty = 'medium') {
@@ -59,6 +69,8 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
         hints: saved.hints,
         seconds: saved.seconds,
         hintsUsed: saved.hintsUsed,
+        score: saved.score,
+        mistakes: saved.mistakes,
       }
     }
     const game = generatePuzzle(initialDifficulty)
@@ -71,6 +83,8 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       hints: createEmptyHints(),
       seconds: 0,
       hintsUsed: 0,
+      score: 0,
+      mistakes: 0,
     }
   })
 
@@ -81,8 +95,10 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     board: initial.board,
     notes: initial.notes,
     hints: initial.hints,
+    score: initial.score,
+    mistakes: initial.mistakes,
   })
-  const { board, notes, hints } = state
+  const { board, notes, hints, score, mistakes } = state
 
   const [selected, setSelected] = useState<CellPosition | null>(null)
   const [isNotesMode, setIsNotesMode] = useState(false)
@@ -114,21 +130,24 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     [isGiven, isHint],
   )
 
-  const hasConflict = useCallback(
+  /** A cell is "incorrect" if it's filled with a value that doesn't match the true solution. */
+  const isIncorrect = useCallback(
     (row: number, col: number) => {
       const value = board[row][col]
       if (value === 0) return false
-      return !isValidPlacement(board, row, col, value)
+      return value !== solution[row][col]
     },
-    [board],
+    [board, solution],
   )
 
   const isSolved = useMemo(() => {
     return (
       board.every((row) => row.every((v) => v !== 0)) &&
-      !board.some((row, r) => row.some((_, c) => hasConflict(r, c)))
+      !board.some((row, r) => row.some((_, c) => isIncorrect(r, c)))
     )
-  }, [board, hasConflict])
+  }, [board, isIncorrect])
+
+  const isGameOver = mistakes >= MAX_MISTAKES
 
   useEffect(() => {
     if (isFirstTimerRun.current) {
@@ -152,7 +171,7 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
   // Persist progress so refreshing the page resumes the same game.
   useEffect(() => {
     saveGame({
-      version: 1,
+      version: 2,
       difficulty,
       puzzle,
       solution,
@@ -161,8 +180,10 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       hints,
       seconds,
       hintsUsed,
+      score,
+      mistakes,
     })
-  }, [difficulty, puzzle, solution, board, notes, hints, seconds, hintsUsed])
+  }, [difficulty, puzzle, solution, board, notes, hints, seconds, hintsUsed, score, mistakes])
 
   const selectCell = useCallback((row: number, col: number) => {
     setSelected({ row, col })
@@ -191,14 +212,15 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       else cellNotes.splice(idx, 1)
       cellNotes.sort((a, b) => a - b)
 
-      setState({ board, notes: nextNotes, hints })
+      setState({ board, notes: nextNotes, hints, score, mistakes })
     },
-    [selected, isLocked, board, notes, hints, state, pushHistory],
+    [selected, isLocked, board, notes, hints, score, mistakes, state, pushHistory],
   )
 
   /** Writes a value (1-9) into the selected cell — or toggles a note, if notes mode is on. */
   const setValue = useCallback(
     (value: number) => {
+      if (isGameOver || isSolved) return
       if (isNotesMode) {
         toggleNote(value)
         return
@@ -214,14 +236,34 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       const nextNotes = cloneNotes(notes)
       nextNotes[row][col] = [] // filling a cell clears its own pencil marks
 
-      setState({ board: nextBoard, notes: nextNotes, hints })
-      setCelebrate(value === solution[row][col] ? { row, col } : null)
+      const isCorrect = value === solution[row][col]
+      const nextScore = isCorrect ? score + POINTS_PER_CORRECT_ENTRY : score
+      const nextMistakes = isCorrect ? mistakes : Math.min(mistakes + 1, MAX_MISTAKES)
+
+      setState({ board: nextBoard, notes: nextNotes, hints, score: nextScore, mistakes: nextMistakes })
+      setCelebrate(isCorrect ? { row, col } : null)
     },
-    [isNotesMode, toggleNote, selected, isLocked, board, notes, hints, solution, state, pushHistory],
+    [
+      isGameOver,
+      isSolved,
+      isNotesMode,
+      toggleNote,
+      selected,
+      isLocked,
+      board,
+      notes,
+      hints,
+      score,
+      mistakes,
+      solution,
+      state,
+      pushHistory,
+    ],
   )
 
   /** Clears the selected cell's value and notes, if it's editable. */
   const clearCell = useCallback(() => {
+    if (isGameOver || isSolved) return
     if (!selected) return
     const { row, col } = selected
     if (isLocked(row, col)) return
@@ -233,15 +275,16 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     const nextNotes = cloneNotes(notes)
     nextNotes[row][col] = []
 
-    setState({ board: nextBoard, notes: nextNotes, hints })
+    setState({ board: nextBoard, notes: nextNotes, hints, score, mistakes })
     setCelebrate(null)
-  }, [selected, isLocked, board, notes, hints, state, pushHistory])
+  }, [isGameOver, isSolved, selected, isLocked, board, notes, hints, score, mistakes, state, pushHistory])
 
   /**
    * Reveals the correct value for the selected cell (or a random empty cell,
    * if nothing usable is selected), locking it like a given cell.
    */
   const useHint = useCallback(() => {
+    if (isGameOver || isSolved) return
     let target = selected
     if (!target || isLocked(target.row, target.col) || board[target.row][target.col] !== 0) {
       const emptyCells: CellPosition[] = []
@@ -263,13 +306,14 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     const nextHints = cloneHints(hints)
     nextHints[row][col] = true
 
-    setState({ board: nextBoard, notes: nextNotes, hints: nextHints })
+    setState({ board: nextBoard, notes: nextNotes, hints: nextHints, score, mistakes })
     setSelected(target)
     setHintsUsed((n) => n + 1)
     setCelebrate(target)
-  }, [selected, isLocked, board, notes, hints, solution, state, pushHistory])
+  }, [isGameOver, isSolved, selected, isLocked, board, notes, hints, score, mistakes, solution, state, pushHistory])
 
   const undo = useCallback(() => {
+    if (isGameOver) return
     setHistory((prevHistory) => {
       if (prevHistory.length === 0) return prevHistory
       const last = prevHistory[prevHistory.length - 1]
@@ -278,9 +322,10 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       return prevHistory.slice(0, -1)
     })
     setCelebrate(null)
-  }, [state])
+  }, [isGameOver, state])
 
   const redo = useCallback(() => {
+    if (isGameOver) return
     setFuture((prevFuture) => {
       if (prevFuture.length === 0) return prevFuture
       const next = prevFuture[0]
@@ -289,17 +334,23 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       return prevFuture.slice(1)
     })
     setCelebrate(null)
-  }, [state])
+  }, [isGameOver, state])
 
-  const canUndo = history.length > 0
-  const canRedo = future.length > 0
+  const canUndo = history.length > 0 && !isGameOver
+  const canRedo = future.length > 0 && !isGameOver
 
   const newGame = useCallback(
     (nextDifficulty: Difficulty = difficulty) => {
       const game = generatePuzzle(nextDifficulty)
       setDifficulty(nextDifficulty)
       setGame(game)
-      setState({ board: cloneBoard(game.puzzle), notes: createEmptyNotes(), hints: createEmptyHints() })
+      setState({
+        board: cloneBoard(game.puzzle),
+        notes: createEmptyNotes(),
+        hints: createEmptyHints(),
+        score: 0,
+        mistakes: 0,
+      })
       setSelected(null)
       setIsNotesMode(false)
       setCelebrate(null)
@@ -325,11 +376,15 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     seconds,
     isNotesMode,
     hintsUsed,
+    score,
+    mistakes,
+    maxMistakes: MAX_MISTAKES,
     isGiven,
     isHint,
-    hasConflict,
+    isIncorrect,
     isCelebrating,
     isSolved,
+    isGameOver,
     canUndo,
     canRedo,
     selectCell,

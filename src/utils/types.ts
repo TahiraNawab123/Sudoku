@@ -10,8 +10,8 @@ export const ALL_DIFFICULTIES: Difficulty[] = ['beginner', 'easy', 'medium', 'ha
 
 /** Number of filled (given) cells removed for each difficulty. Out of 81 total cells. */
 export const DIFFICULTY_CLUES: Record<Difficulty, number> = {
-  beginner: 45, // very easy, lots of clues to lean on
-  easy: 38,
+  beginner: 50, // very easy, most of the board already filled in
+  easy: 40,
   medium: 32,
   hard: 28,
   expert: 24,
@@ -24,3 +24,9 @@ export interface Puzzle {
   solution: Board
   difficulty: Difficulty
 }
+
+/** Points awarded for each correct entry. */
+export const POINTS_PER_CORRECT = 145
+
+/** Number of wrong entries allowed before the game ends. */
+export const MAX_MISTAKES = 3

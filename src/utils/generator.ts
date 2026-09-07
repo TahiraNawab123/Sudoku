@@ -1,4 +1,4 @@
-import { hasUniqueSolution, solveBoard } from './solver'
+import { hasUniqueSolution, solvableWithBasicLogic, solveBoard } from './solver'
 import { DIFFICULTY_CLUES, type Board, type Difficulty, type Puzzle } from './types'
 
 const SIZE = 9
@@ -54,11 +54,45 @@ function carvePuzzle(solved: Board, targetClues: number): Board {
   return puzzle
 }
 
+/**
+ * Same as carvePuzzle, but additionally requires that the puzzle remain
+ * solvable using only basic logic (naked/hidden singles) after every
+ * removal - guaranteeing a genuinely beginner-friendly puzzle with no
+ * guessing required anywhere, even if that means keeping a few extra clues
+ * beyond the target.
+ */
+function carvePuzzleLogical(solved: Board, targetClues: number): Board {
+  const puzzle = solved.map((row) => [...row])
+  let cluesRemaining = TOTAL_CELLS
+
+  for (const index of shuffledIndices()) {
+    if (cluesRemaining <= targetClues) break
+
+    const row = Math.floor(index / SIZE)
+    const col = index % SIZE
+    if (puzzle[row][col] === 0) continue
+
+    const backup = puzzle[row][col]
+    puzzle[row][col] = 0
+
+    if (hasUniqueSolution(puzzle) && solvableWithBasicLogic(puzzle)) {
+      cluesRemaining--
+    } else {
+      puzzle[row][col] = backup
+    }
+  }
+
+  return puzzle
+}
+
 /** Generates a new puzzle (and its solution) for the given difficulty. */
 export function generatePuzzle(difficulty: Difficulty): Puzzle {
   const solution = generateSolvedBoard()
   const targetClues = DIFFICULTY_CLUES[difficulty]
-  const puzzle = carvePuzzle(solution, targetClues)
+  const puzzle =
+    difficulty === 'beginner'
+      ? carvePuzzleLogical(solution, targetClues)
+      : carvePuzzle(solution, targetClues)
 
   return { puzzle, solution, difficulty }
 }

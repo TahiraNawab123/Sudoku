@@ -113,6 +113,10 @@ export function hasUniqueSolution(board: Board): boolean {
   return countSolutions(board, 2) === 1
 }
 
+/**
+ * Returns a fully solved copy of the board, or null if unsolvable.
+ * Does not mutate the input board.
+ */
 export function solve(board: Board): Board | null {
   const copy = board.map((r) => [...r])
   return solveBoard(copy) ? copy : null
@@ -129,4 +133,92 @@ export function isBoardValid(board: Board): boolean {
     }
   }
   return true
+}
+
+/** Candidate numbers (1-9) still legal for an empty cell, given the board's current state. */
+function getCandidates(board: Board, row: number, col: number): Set<number> {
+  const used = new Set<number>()
+  for (let i = 0; i < SIZE; i++) {
+    used.add(board[row][i])
+    used.add(board[i][col])
+  }
+  const boxRow = Math.floor(row / BOX_SIZE) * BOX_SIZE
+  const boxCol = Math.floor(col / BOX_SIZE) * BOX_SIZE
+  for (let r = boxRow; r < boxRow + BOX_SIZE; r++) {
+    for (let c = boxCol; c < boxCol + BOX_SIZE; c++) {
+      used.add(board[r][c])
+    }
+  }
+
+  const candidates = new Set<number>()
+  for (let v = 1; v <= 9; v++) {
+    if (!used.has(v)) candidates.add(v)
+  }
+  return candidates
+}
+
+/** All 27 units (9 rows, 9 columns, 9 boxes) as lists of [row, col] coordinates. */
+function allUnits(): [number, number][][] {
+  const units: [number, number][][] = []
+
+  for (let r = 0; r < SIZE; r++) {
+    units.push(Array.from({ length: SIZE }, (_, c) => [r, c]))
+  }
+  for (let c = 0; c < SIZE; c++) {
+    units.push(Array.from({ length: SIZE }, (_, r) => [r, c]))
+  }
+  for (let boxRow = 0; boxRow < SIZE; boxRow += BOX_SIZE) {
+    for (let boxCol = 0; boxCol < SIZE; boxCol += BOX_SIZE) {
+      const cells: [number, number][] = []
+      for (let r = boxRow; r < boxRow + BOX_SIZE; r++) {
+        for (let c = boxCol; c < boxCol + BOX_SIZE; c++) cells.push([r, c])
+      }
+      units.push(cells)
+    }
+  }
+
+  return units
+}
+
+/**
+ * Tries to fully solve the board using only two beginner-level techniques:
+ * "naked singles" (a cell has exactly one legal candidate) and "hidden singles"
+ * (a candidate value fits in exactly one cell within a row/column/box). No
+ * guessing or backtracking. Returns true only if this alone solves the whole
+ * board - used to guarantee Beginner puzzles never require advanced deduction.
+ */
+export function solvableWithBasicLogic(board: Board): boolean {
+  const b = board.map((r) => [...r])
+  const units = allUnits()
+  let progress = true
+
+  while (progress) {
+    progress = false
+
+    // Naked singles.
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        if (b[row][col] !== 0) continue
+        const candidates = getCandidates(b, row, col)
+        if (candidates.size === 1) {
+          b[row][col] = [...candidates][0]
+          progress = true
+        }
+      }
+    }
+
+    // Hidden singles.
+    for (const unit of units) {
+      for (let value = 1; value <= 9; value++) {
+        const spots = unit.filter(([r, c]) => b[r][c] === 0 && getCandidates(b, r, c).has(value))
+        if (spots.length === 1) {
+          const [r, c] = spots[0]
+          b[r][c] = value
+          progress = true
+        }
+      }
+    }
+  }
+
+  return b.every((row) => row.every((v) => v !== 0))
 }
