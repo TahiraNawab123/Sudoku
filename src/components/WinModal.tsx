@@ -6,9 +6,20 @@ interface WinModalProps {
   difficulty: Difficulty
   hintsUsed: number
   onNewGame: (difficulty: Difficulty) => void
+  isLoggedIn: boolean
+  submitStatus: 'idle' | 'submitting' | 'done' | 'error'
+  onSignIn: () => void
 }
 
-function WinModal({ seconds, difficulty, hintsUsed, onNewGame }: WinModalProps) {
+function WinModal({
+  seconds,
+  difficulty,
+  hintsUsed,
+  onNewGame,
+  isLoggedIn,
+  submitStatus,
+  onSignIn,
+}: WinModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4">
       <div className="w-full max-w-sm rounded-2xl bg-paper p-8 text-center shadow-2xl">
@@ -29,6 +40,24 @@ function WinModal({ seconds, difficulty, hintsUsed, onNewGame }: WinModalProps) 
             <dd className="font-medium text-ink">{hintsUsed}</dd>
           </div>
         </dl>
+
+        <div className="mt-5 text-center text-sm">
+          {!isLoggedIn ? (
+            <button
+              type="button"
+              onClick={onSignIn}
+              className="text-accent underline underline-offset-4"
+            >
+              Sign in to save this score to the leaderboard
+            </button>
+          ) : submitStatus === 'submitting' ? (
+            <p className="text-ink/50">Saving to leaderboard…</p>
+          ) : submitStatus === 'done' ? (
+            <p className="text-accent">✅ Saved to the leaderboard</p>
+          ) : submitStatus === 'error' ? (
+            <p className="text-ink/50">Couldn't save your score — you're still logged in, try again next round.</p>
+          ) : null}
+        </div>
 
         <p className="mt-6 text-xs font-medium uppercase tracking-wide text-ink/40">
           Play again

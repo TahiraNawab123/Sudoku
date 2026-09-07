@@ -1,8 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Board from './components/Board'
+import GameOverModal from './components/GameOverModal'
 import Keypad from './components/Keypad'
 import WinModal from './components/WinModal'
+import AuthModal from './components/AuthModal'
+import LeaderboardModal from './components/LeaderboardModal'
 import { useSudoku } from './hooks/useSudoku'
+import { useAuth } from './hooks/useAuth'
+import { submitScore } from './utils/leaderboard'
 import { formatTime } from './utils/formatTime'
 import { ALL_DIFFICULTIES } from './utils/types'
 
@@ -15,11 +20,15 @@ function App() {
     seconds,
     isNotesMode,
     hintsUsed,
+    score,
+    mistakes,
+    maxMistakes,
     isGiven,
     isHint,
-    hasConflict,
+    isIncorrect,
     isCelebrating,
     isSolved,
+    isGameOver,
     canUndo,
     canRedo,
     selectCell,
@@ -31,6 +40,35 @@ function App() {
     redo,
     newGame,
   } = useSudoku('medium')
+
+  const auth = useAuth()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle')
+  const hasSubmittedRef = useRef(false)
+
+  // Automatically submit the score to the leaderboard once, right when a puzzle is solved
+  // (only if the person is logged in). Resets whenever a new puzzle starts.
+  useEffect(() => {
+    if (!isSolved) {
+      hasSubmittedRef.current = false
+      setSubmitStatus('idle')
+      return
+    }
+    if (hasSubmittedRef.current || !auth.user) return
+
+    hasSubmittedRef.current = true
+    setSubmitStatus('submitting')
+    submitScore({
+      userId: auth.user.id,
+      difficulty,
+      score,
+      timeSeconds: seconds,
+      mistakes,
+    }).then((result) => {
+      setSubmitStatus(result.error ? 'error' : 'done')
+    })
+  }, [isSolved, auth.user, difficulty, score, seconds, mistakes])
 
   // Physical keyboard support: 1-9 to fill/note, Backspace/Delete/0 to clear,
   // Ctrl/Cmd+Z to undo, Ctrl/Cmd+Shift+Z (or Ctrl+Y) to redo, N to toggle notes mode.
@@ -98,6 +136,40 @@ function App() {
         <span className="font-mono text-sm tabular-nums text-ink/60" aria-label="Elapsed time">
           ⏱ {formatTime(seconds)}
         </span>
+
+        <span className="text-sm font-medium text-ink/70" aria-label="Score">
+          ⭐ {score}
+        </span>
+
+        <span className="text-sm font-medium text-ink/70" aria-label="Mistakes">
+          ❌ {mistakes}/{maxMistakes}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setShowLeaderboard(true)}
+          className="rounded-full border border-grid/30 px-3 py-1.5 text-sm text-ink/70 hover:border-accent/50"
+        >
+          🏆 Leaderboard
+        </button>
+
+        {auth.user ? (
+          <button
+            type="button"
+            onClick={() => auth.signOut()}
+            className="rounded-full border border-grid/30 px-3 py-1.5 text-sm text-ink/70 hover:border-accent/50"
+          >
+            👤 {auth.username ?? 'Account'} · Sign out
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
+            className="rounded-full border border-grid/30 px-3 py-1.5 text-sm text-ink/70 hover:border-accent/50"
+          >
+            Sign in
+          </button>
+        )}
       </div>
 
       <Board
@@ -106,7 +178,7 @@ function App() {
         selected={selected}
         isGiven={isGiven}
         isHint={isHint}
-        hasConflict={hasConflict}
+        isIncorrect={isIncorrect}
         isCelebrating={isCelebrating}
         onSelect={selectCell}
       />
@@ -162,12 +234,35 @@ function App() {
 
       <Keypad board={board} onNumber={setValue} onErase={clearCell} />
 
-      {isSolved && (
+      {isSolved && !isGameOver && (
         <WinModal
           seconds={seconds}
           difficulty={difficulty}
           hintsUsed={hintsUsed}
           onNewGame={newGame}
+          isLoggedIn={Boolean(auth.user)}
+          submitStatus={submitStatus}
+          onSignIn={() => setShowAuthModal(true)}
+        />
+      )}
+
+      {isGameOver && (
+        <GameOverModal
+          seconds={seconds}
+          difficulty={difficulty}
+          score={score}
+          mistakes={mistakes}
+          maxMistakes={maxMistakes}
+          onNewGame={newGame}
+        />
+      )}
+
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+
+      {showLeaderboard && (
+        <LeaderboardModal
+          initialDifficulty={difficulty}
+          onClose={() => setShowLeaderboard(false)}
         />
       )}
 
