@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import Board from './components/Board'
-import GameOverModal from './components/GameOverModal'
 import Keypad from './components/Keypad'
 import WinModal from './components/WinModal'
 import AuthModal from './components/AuthModal'
