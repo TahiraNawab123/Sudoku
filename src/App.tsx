@@ -4,6 +4,7 @@ import Keypad from './components/Keypad'
 import WinModal from './components/WinModal'
 import AuthModal from './components/AuthModal'
 import LeaderboardModal from './components/LeaderboardModal'
+import GameOverModal from './components/GameOverModal'
 import { useSudoku } from './hooks/useSudoku'
 import { useAuth } from './hooks/useAuth'
 import { submitScore } from './utils/leaderboard'
@@ -177,7 +178,7 @@ function App() {
         selected={selected}
         isGiven={isGiven}
         isHint={isHint}
-        isIncorrect={isIncorrect}
+        hasConflict={isIncorrect}
         isCelebrating={isCelebrating}
         onSelect={selectCell}
       />

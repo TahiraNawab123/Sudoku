@@ -203,10 +203,8 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       hints,
       seconds,
       hintsUsed,
-      score,
-      mistakes,
     })
-  }, [difficulty, puzzle, solution, board, notes, hints, seconds, hintsUsed, score, mistakes])
+  }, [difficulty, puzzle, solution, board, notes, hints, seconds, hintsUsed])
 
   const selectCell = useCallback((row: number, col: number) => {
     setSelected({ row, col })
