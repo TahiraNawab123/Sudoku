@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Board from './components/Board'
+import GameOverModal from './components/GameOverModal'
 import Keypad from './components/Keypad'
 import WinModal from './components/WinModal'
 import AuthModal from './components/AuthModal'
 import LeaderboardModal from './components/LeaderboardModal'
-import GameOverModal from './components/GameOverModal'
 import { useSudoku } from './hooks/useSudoku'
 import { useAuth } from './hooks/useAuth'
 import { submitScore } from './utils/leaderboard'
@@ -104,72 +104,68 @@ function App() {
   }, [setValue, clearCell, undo, redo, toggleNotesMode])
 
   return (
-    <div className="flex min-h-screen flex-col items-center gap-6 px-4 py-10">
-      <header className="text-center">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">
-          Sudoku
-        </h1>
-        <p className="mt-1 text-sm text-ink/60">
-          Click a cell, then type a number or use the keypad below.
-        </p>
-      </header>
-
-      <div className="flex flex-wrap items-center justify-center gap-4">
-        <div className="flex gap-2">
-          {ALL_DIFFICULTIES.map((d) => (
+    <div className="flex min-h-screen flex-col items-center gap-5 px-4 py-6 sm:py-10">
+      {/* Slim top bar: identity on the left, account/leaderboard on the right */}
+      <div className="flex w-full max-w-xl items-center justify-between">
+        <h1 className="font-display text-lg font-semibold text-ink">Sudoku</h1>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowLeaderboard(true)}
+            className="rounded-full px-3 py-1.5 text-sm text-ink/60 hover:bg-accentSoft hover:text-ink"
+          >
+            🏆 Leaderboard
+          </button>
+          {auth.user ? (
             <button
-              key={d}
               type="button"
-              onClick={() => newGame(d)}
-              className={[
-                'rounded-full border px-4 py-1.5 text-sm capitalize transition-colors',
-                d === difficulty
-                  ? 'border-accent bg-accent text-white'
-                  : 'border-grid/30 bg-paper text-ink/70 hover:border-accent/50',
-              ].join(' ')}
+              onClick={() => auth.signOut()}
+              className="rounded-full px-3 py-1.5 text-sm text-ink/60 hover:bg-accentSoft hover:text-ink"
             >
-              {d}
+              {auth.username ?? 'Account'} · Sign out
             </button>
-          ))}
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAuthModal(true)}
+              className="rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent/90"
+            >
+              Sign in
+            </button>
+          )}
         </div>
+      </div>
 
-        <span className="font-mono text-sm tabular-nums text-ink/60" aria-label="Elapsed time">
+      {/* Difficulty: a true segmented control, not a row of separate pills */}
+      <div className="flex w-full max-w-xl rounded-full bg-surface p-1 shadow-toolbar">
+        {ALL_DIFFICULTIES.map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => newGame(d)}
+            className={[
+              'flex-1 rounded-full px-2 py-1.5 text-xs font-medium capitalize transition-colors sm:text-sm',
+              d === difficulty ? 'bg-accent text-white' : 'text-ink/60 hover:text-ink',
+            ].join(' ')}
+          >
+            {d}
+          </button>
+        ))}
+      </div>
+
+      {/* Live game status, grouped as one unit rather than scattered */}
+      <div className="flex items-center gap-4 rounded-full bg-surface px-5 py-2 text-sm shadow-toolbar sm:gap-6">
+        <span className="flex items-center gap-1.5 font-mono tabular-nums text-ink/70" aria-label="Elapsed time">
           ⏱ {formatTime(seconds)}
         </span>
-
-        <span className="text-sm font-medium text-ink/70" aria-label="Score">
+        <span className="h-4 w-px bg-grid/15" aria-hidden="true" />
+        <span className="flex items-center gap-1.5 font-medium text-ink/70" aria-label="Score">
           ⭐ {score}
         </span>
-
-        <span className="text-sm font-medium text-ink/70" aria-label="Mistakes">
+        <span className="h-4 w-px bg-grid/15" aria-hidden="true" />
+        <span className="flex items-center gap-1.5 font-medium text-ink/70" aria-label="Mistakes">
           ❌ {mistakes}/{maxMistakes}
         </span>
-
-        <button
-          type="button"
-          onClick={() => setShowLeaderboard(true)}
-          className="rounded-full border border-grid/30 px-3 py-1.5 text-sm text-ink/70 hover:border-accent/50"
-        >
-          🏆 Leaderboard
-        </button>
-
-        {auth.user ? (
-          <button
-            type="button"
-            onClick={() => auth.signOut()}
-            className="rounded-full border border-grid/30 px-3 py-1.5 text-sm text-ink/70 hover:border-accent/50"
-          >
-            👤 {auth.username ?? 'Account'} · Sign out
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowAuthModal(true)}
-            className="rounded-full border border-grid/30 px-3 py-1.5 text-sm text-ink/70 hover:border-accent/50"
-          >
-            Sign in
-          </button>
-        )}
       </div>
 
       <Board
@@ -178,57 +174,56 @@ function App() {
         selected={selected}
         isGiven={isGiven}
         isHint={isHint}
-        hasConflict={isIncorrect}
+        isIncorrect={isIncorrect}
         isCelebrating={isCelebrating}
         onSelect={selectCell}
       />
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      {/* Compact action toolbar - visually secondary to the keypad below it */}
+      <div className="flex items-center gap-1 rounded-2xl bg-surface p-1.5 shadow-toolbar">
         <button
           type="button"
           onClick={undo}
           disabled={!canUndo}
+          title="Undo"
           className={[
-            'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
-            canUndo
-              ? 'border-grid/30 text-ink/70 hover:border-accent hover:bg-accentSoft'
-              : 'cursor-not-allowed border-grid/10 text-ink/20',
+            'flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium transition-colors',
+            canUndo ? 'text-ink/70 hover:bg-accentSoft' : 'cursor-not-allowed text-ink/20',
           ].join(' ')}
         >
-          ↩ Undo
+          ↩ <span className="hidden sm:inline">Undo</span>
         </button>
         <button
           type="button"
           onClick={redo}
           disabled={!canRedo}
+          title="Redo"
           className={[
-            'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
-            canRedo
-              ? 'border-grid/30 text-ink/70 hover:border-accent hover:bg-accentSoft'
-              : 'cursor-not-allowed border-grid/10 text-ink/20',
+            'flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium transition-colors',
+            canRedo ? 'text-ink/70 hover:bg-accentSoft' : 'cursor-not-allowed text-ink/20',
           ].join(' ')}
         >
-          ↪ Redo
+          ↪ <span className="hidden sm:inline">Redo</span>
         </button>
         <button
           type="button"
           onClick={toggleNotesMode}
           aria-pressed={isNotesMode}
+          title="Notes"
           className={[
-            'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
-            isNotesMode
-              ? 'border-accent bg-accent text-white'
-              : 'border-grid/30 text-ink/70 hover:border-accent hover:bg-accentSoft',
+            'flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium transition-colors',
+            isNotesMode ? 'bg-accent text-white' : 'text-ink/70 hover:bg-accentSoft',
           ].join(' ')}
         >
-          ✏️ Notes {isNotesMode ? 'On' : 'Off'}
+          ✏️ <span className="hidden sm:inline">Notes</span>
         </button>
         <button
           type="button"
           onClick={useHint}
-          className="rounded-lg border border-grid/30 px-4 py-2 text-sm font-medium text-ink/70 transition-colors hover:border-accent hover:bg-accentSoft"
+          title="Hint"
+          className="flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-ink/70 transition-colors hover:bg-accentSoft"
         >
-          💡 Hint {hintsUsed > 0 ? `(${hintsUsed})` : ''}
+          💡 <span className="hidden sm:inline">Hint{hintsUsed > 0 ? ` (${hintsUsed})` : ''}</span>
         </button>
       </div>
 
@@ -265,14 +260,6 @@ function App() {
           onClose={() => setShowLeaderboard(false)}
         />
       )}
-
-      <button
-        type="button"
-        onClick={() => newGame()}
-        className="text-sm text-ink/60 underline underline-offset-4 hover:text-accent"
-      >
-        New game
-      </button>
     </div>
   )
 }
