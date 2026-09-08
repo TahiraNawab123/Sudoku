@@ -137,7 +137,7 @@ function App() {
       </div>
 
       {/* Difficulty: a true segmented control, not a row of separate pills */}
-      <div className="flex w-full max-w-xl rounded-full bg-surface p-1 shadow-toolbar">
+      <div className="flex w-full max-w-xl rounded-full border border-grid/10 bg-surface p-1 shadow-toolbar">
         {ALL_DIFFICULTIES.map((d) => (
           <button
             key={d}
@@ -154,7 +154,7 @@ function App() {
       </div>
 
       {/* Live game status, grouped as one unit rather than scattered */}
-      <div className="flex items-center gap-4 rounded-full bg-surface px-5 py-2 text-sm shadow-toolbar sm:gap-6">
+      <div className="flex items-center gap-4 rounded-full border border-grid/10 bg-surface px-5 py-2 text-sm shadow-toolbar sm:gap-6">
         <span className="flex items-center gap-1.5 font-mono tabular-nums text-ink/70" aria-label="Elapsed time">
           ⏱ {formatTime(seconds)}
         </span>
@@ -180,7 +180,7 @@ function App() {
       />
 
       {/* Compact action toolbar - visually secondary to the keypad below it */}
-      <div className="flex items-center gap-1 rounded-2xl bg-surface p-1.5 shadow-toolbar">
+      <div className="flex items-center gap-1 rounded-2xl border border-grid/10 bg-surface p-1.5 shadow-toolbar">
         <button
           type="button"
           onClick={undo}

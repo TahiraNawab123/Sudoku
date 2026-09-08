@@ -20,7 +20,7 @@ function GameOverModal({
 }: GameOverModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-surface p-8 text-center shadow-board">
+      <div className="w-full max-w-sm rounded-2xl border border-grid/10 bg-surface p-8 text-center shadow-board">
         <p className="text-4xl">💥</p>
         <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Game over</h2>
         <p className="mt-1 text-sm text-ink/60">

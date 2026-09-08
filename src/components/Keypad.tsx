@@ -22,7 +22,7 @@ function Keypad({ board, onNumber, onErase }: KeypadProps) {
   const counts = countDigits(board)
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-surface p-2.5 shadow-toolbar">
+    <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-grid/10 bg-surface p-2.5 shadow-toolbar">
       {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => {
         // A digit is "complete" once it's been placed 9 times — all its slots are filled.
         const isComplete = counts[n] >= 9

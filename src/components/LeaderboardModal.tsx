@@ -33,7 +33,7 @@ function LeaderboardModal({ initialDifficulty, onClose }: LeaderboardModalProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-board">
+      <div className="w-full max-w-md rounded-2xl border border-grid/10 bg-surface p-6 shadow-board">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl font-semibold text-ink">🏆 Leaderboard</h2>
           <button
