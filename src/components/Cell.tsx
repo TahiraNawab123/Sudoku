@@ -33,7 +33,7 @@ function Cell({
   const borderRight = col === 8 ? 'border-r-2' : ''
   const borderBottom = row === 8 ? 'border-b-2' : ''
 
-  let background = 'bg-paper'
+  let background = 'bg-surface'
   if (isSelected) background = 'bg-accent/25'
   else if (isSameValue && value !== 0) background = 'bg-accent/15'
   else if (isPeer) background = 'bg-accentSoft'
