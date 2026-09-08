@@ -8,7 +8,7 @@ interface BoardProps {
   selected: CellPosition | null
   isGiven: (row: number, col: number) => boolean
   isHint: (row: number, col: number) => boolean
-  hasConflict: (row: number, col: number) => boolean
+  isIncorrect: (row: number, col: number) => boolean
   isCelebrating: (row: number, col: number) => boolean
   onSelect: (row: number, col: number) => void
 }
@@ -26,30 +26,32 @@ function isPeerOf(selected: CellPosition | null, row: number, col: number): bool
   return sameRow || sameCol || sameBox
 }
 
-function Board({ board, notes, selected, isGiven, isHint, hasConflict, isCelebrating, onSelect }: BoardProps) {
+function Board({ board, notes, selected, isGiven, isHint, isIncorrect, isCelebrating, onSelect }: BoardProps) {
   const selectedValue = selected ? board[selected.row][selected.col] : 0
 
   return (
-    <div className="grid w-full max-w-[min(90vw,32rem)] grid-cols-9 border-2 border-grid/70">
-      {board.map((rowValues, row) =>
-        rowValues.map((value, col) => (
-          <Cell
-            key={`${row}-${col}`}
-            value={value}
-            row={row}
-            col={col}
-            notes={notes[row][col]}
-            isGiven={isGiven(row, col)}
-            isHint={isHint(row, col)}
-            isSelected={selected?.row === row && selected?.col === col}
-            isPeer={isPeerOf(selected, row, col)}
-            isSameValue={selectedValue !== 0 && value === selectedValue}
-            hasConflict={hasConflict(row, col)}
-            isCelebrating={isCelebrating(row, col)}
-            onSelect={onSelect}
-          />
-        )),
-      )}
+    <div className="rounded-2xl bg-surface p-2.5 shadow-board sm:p-3.5">
+      <div className="grid w-full max-w-[min(88vw,32rem)] grid-cols-9 border-2 border-grid/70">
+        {board.map((rowValues, row) =>
+          rowValues.map((value, col) => (
+            <Cell
+              key={`${row}-${col}`}
+              value={value}
+              row={row}
+              col={col}
+              notes={notes[row][col]}
+              isGiven={isGiven(row, col)}
+              isHint={isHint(row, col)}
+              isSelected={selected?.row === row && selected?.col === col}
+              isPeer={isPeerOf(selected, row, col)}
+              isSameValue={selectedValue !== 0 && value === selectedValue}
+              hasConflict={isIncorrect(row, col)}
+              isCelebrating={isCelebrating(row, col)}
+              onSelect={onSelect}
+            />
+          )),
+        )}
+      </div>
     </div>
   )
 }
