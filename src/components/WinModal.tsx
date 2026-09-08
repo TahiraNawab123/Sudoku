@@ -22,7 +22,7 @@ function WinModal({
 }: WinModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-paper p-8 text-center shadow-2xl">
+      <div className="w-full max-w-sm rounded-2xl bg-surface p-8 text-center shadow-board">
         <p className="text-4xl">🎉</p>
         <h2 className="mt-2 font-display text-2xl font-semibold text-ink">Puzzle solved!</h2>
 
@@ -59,7 +59,7 @@ function WinModal({
           ) : null}
         </div>
 
-        <p className="mt-6 text-xs font-medium uppercase tracking-wide text-ink/40">
+        <p className="mt-6 text-sm text-ink/50">
           Play again
         </p>
         <div className="mt-2 flex flex-wrap justify-center gap-2">
