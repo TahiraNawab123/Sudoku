@@ -106,7 +106,7 @@ function App() {
   return (
     <div className="flex min-h-screen flex-col items-center gap-5 px-4 py-6 sm:py-10">
       {/* Slim top bar: identity on the left, account/leaderboard on the right */}
-      <div className="flex w-full max-w-xl items-center justify-between">
+      <div className="flex w-full max-w-2xl items-center justify-between">
         <h1 className="font-display text-lg font-semibold text-ink">Sudoku</h1>
         <div className="flex items-center gap-2">
           <button
@@ -137,7 +137,7 @@ function App() {
       </div>
 
       {/* Difficulty: a true segmented control, not a row of separate pills */}
-      <div className="flex w-full max-w-xl rounded-full border border-grid/10 bg-surface p-1 shadow-toolbar">
+      <div className="flex w-full max-w-2xl rounded-full border border-grid/10 bg-surface p-1 shadow-toolbar">
         {ALL_DIFFICULTIES.map((d) => (
           <button
             key={d}
