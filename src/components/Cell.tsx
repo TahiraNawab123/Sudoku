@@ -53,7 +53,7 @@ function Cell({
       aria-label={`Row ${row + 1}, column ${col + 1}${value ? `, value ${value}` : ', empty'}`}
       className={[
         'relative flex aspect-square w-full items-center justify-center',
-        'font-body text-lg sm:text-xl',
+        'font-body text-xl sm:text-3xl',
         'border-grid/40 transition-colors duration-100',
         borderTop,
         borderLeft,
@@ -72,7 +72,7 @@ function Cell({
           {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => (
             <span
               key={n}
-              className="flex items-center justify-center text-[9px] leading-none text-ink/45 sm:text-[10px]"
+              className="flex items-center justify-center text-[10px] leading-none text-ink/45 sm:text-xs"
             >
               {notes.includes(n) ? n : ''}
             </span>
