@@ -45,7 +45,7 @@ function Board({ board, notes, selected, isGiven, isHint, isIncorrect, isCelebra
               isSelected={selected?.row === row && selected?.col === col}
               isPeer={isPeerOf(selected, row, col)}
               isSameValue={selectedValue !== 0 && value === selectedValue}
-              hasConflict={isIncorrect(row, col)}
+              isIncorrect={isIncorrect(row, col)}
               isCelebrating={isCelebrating(row, col)}
               onSelect={onSelect}
             />
