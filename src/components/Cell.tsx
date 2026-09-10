@@ -8,7 +8,7 @@ interface CellProps {
   isSelected: boolean
   isPeer: boolean
   isSameValue: boolean
-  hasConflict: boolean
+  isIncorrect: boolean
   isCelebrating: boolean
   onSelect: (row: number, col: number) => void
 }
@@ -23,7 +23,7 @@ function Cell({
   isSelected,
   isPeer,
   isSameValue,
-  hasConflict,
+  isIncorrect,
   isCelebrating,
   onSelect,
 }: CellProps) {
@@ -38,7 +38,7 @@ function Cell({
   else if (isSameValue && value !== 0) background = 'bg-accent/15'
   else if (isPeer) background = 'bg-accentSoft'
 
-  const textColor = hasConflict
+  const textColor = isIncorrect
     ? 'text-red-600'
     : isHint
       ? 'text-blue-600'
