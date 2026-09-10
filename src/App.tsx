@@ -136,15 +136,15 @@ function App() {
         </div>
       </div>
 
-      {/* Difficulty: a true segmented control, not a row of separate pills */}
-      <div className="flex w-full max-w-2xl rounded-full border border-grid/10 bg-surface p-1 shadow-toolbar">
+      {/* Difficulty: a true segmented control, sized to its content, not stretched */}
+      <div className="inline-flex rounded-full border border-grid/10 bg-surface p-1 shadow-toolbar">
         {ALL_DIFFICULTIES.map((d) => (
           <button
             key={d}
             type="button"
             onClick={() => newGame(d)}
             className={[
-              'flex-1 rounded-full px-2 py-1.5 text-xs font-medium capitalize transition-colors sm:text-sm',
+              'rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors sm:px-4',
               d === difficulty ? 'bg-accent text-white' : 'text-ink/60 hover:text-ink',
             ].join(' ')}
           >
