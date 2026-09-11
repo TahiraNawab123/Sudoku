@@ -30,7 +30,7 @@ function AuthModal({ onClose }: AuthModalProps) {
     }
 
     if (mode === 'signUp') {
-      // If email confirmation is on, there's no session yet - let the person know to check their inbox.
+      // If email confirmation is on, there's no session yet, so let the person know to check their inbox.
       setConfirmationSent(true)
     } else {
       onClose()
