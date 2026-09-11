@@ -31,7 +31,7 @@ function Board({ board, notes, selected, isGiven, isHint, isIncorrect, isCelebra
 
   return (
     <div className="rounded-2xl border border-grid/10 bg-surface p-2.5 shadow-board sm:p-3.5">
-      <div className="grid w-full max-w-[min(92vw,42rem)] grid-cols-9 border-[3px] border-grid">
+      <div className="grid w-full max-w-[min(92vw,42rem)] grid-cols-9 border-2 border-grid/50">
         {board.map((rowValues, row) =>
           rowValues.map((value, col) => (
             <Cell
