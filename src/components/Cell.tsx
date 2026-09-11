@@ -53,15 +53,16 @@ function Cell({
       aria-label={`Row ${row + 1}, column ${col + 1}${value ? `, value ${value}` : ', empty'}`}
       className={[
         'relative flex aspect-square w-full items-center justify-center',
-        'font-body text-xl sm:text-3xl',
-        'border-grid/40 transition-colors duration-100',
+        'font-body text-xl sm:text-lxl',
+        'border-grid/25 transition-colors duration-100',
         borderTop,
         borderLeft,
         borderRight,
         borderBottom,
         background,
         textColor,
-        isGiven || isHint ? 'font-semibold' : 'font-normal',
+
+        isGiven || isHint ? 'font-medium' : 'font-normal',
         isCelebrating ? 'z-10 animate-cellPop ring-2 ring-inset ring-accent' : '',
       ].join(' ')}
     >
