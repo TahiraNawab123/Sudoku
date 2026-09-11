@@ -27,11 +27,11 @@ function Cell({
   isCelebrating,
   onSelect,
 }: CellProps) {
-  // Thick, dark borders mark the 3x3 boxes; thin, faint borders mark individual cells.
-  const borderTop = row % 3 === 0 ? 'border-t-[3px] border-t-grid' : 'border-t border-t-grid/15'
-  const borderLeft = col % 3 === 0 ? 'border-l-[3px] border-l-grid' : 'border-l border-l-grid/15'
-  const borderRight = col === 8 ? 'border-r-[3px] border-r-grid' : ''
-  const borderBottom = row === 8 ? 'border-b-[3px] border-b-grid' : ''
+  // Thicker, medium-gray borders mark the 3x3 boxes; thin, faint borders mark individual cells.
+  const borderTop = row % 3 === 0 ? 'border-t-2 border-t-grid/50' : 'border-t border-t-grid/12'
+  const borderLeft = col % 3 === 0 ? 'border-l-2 border-l-grid/50' : 'border-l border-l-grid/12'
+  const borderRight = col === 8 ? 'border-r-2 border-r-grid/50' : ''
+  const borderBottom = row === 8 ? 'border-b-2 border-b-grid/50' : ''
 
   let background = 'bg-surface'
   if (isSelected) background = 'bg-accent/25'
