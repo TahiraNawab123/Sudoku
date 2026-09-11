@@ -104,48 +104,43 @@ function App() {
   }, [setValue, clearCell, undo, redo, toggleNotesMode])
 
   return (
-    <div className="flex min-h-screen flex-col items-center gap-5 px-4 py-6 sm:py-10">
-      {/* Slim top bar: identity on the left, account/leaderboard on the right */}
-      <div className="flex w-full max-w-2xl items-center justify-between">
-        <h1 className="font-display text-lg font-semibold text-ink">Sudoku</h1>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowLeaderboard(true)}
-            className="rounded-full px-3 py-1.5 text-sm text-ink/60 hover:bg-accentSoft hover:text-ink"
-          >
-            🏆 Leaderboard
+    <div className="flex min-h-screen flex-col items-center gap-6 px-4 py-8 sm:py-10">
+      {/* Minimal top-right nav - small and out of the way, doesn't compete with the title */}
+      <div className="flex w-full max-w-2xl justify-end gap-4 text-sm text-ink/50">
+        <button type="button" onClick={() => setShowLeaderboard(true)} className="hover:text-accent">
+          🏆 Leaderboard
+        </button>
+        {auth.user ? (
+          <button type="button" onClick={() => auth.signOut()} className="hover:text-accent">
+            {auth.username ?? 'Account'} · Sign out
           </button>
-          {auth.user ? (
-            <button
-              type="button"
-              onClick={() => auth.signOut()}
-              className="rounded-full px-3 py-1.5 text-sm text-ink/60 hover:bg-accentSoft hover:text-ink"
-            >
-              {auth.username ?? 'Account'} · Sign out
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowAuthModal(true)}
-              className="rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent/90"
-            >
-              Sign in
-            </button>
-          )}
-        </div>
+        ) : (
+          <button type="button" onClick={() => setShowAuthModal(true)} className="font-medium text-accent hover:underline">
+            Sign in
+          </button>
+        )}
       </div>
 
-      {/* Difficulty: a true segmented control, sized to its content, not stretched */}
-      <div className="inline-flex rounded-full border border-grid/10 bg-surface p-1 shadow-toolbar">
+      {/* Hero: the game's identity, front and center */}
+      <header className="text-center">
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">Sudoku</h1>
+        <p className="mt-1 text-sm text-ink/50">
+          Click a cell, then type a number or use the keypad below.
+        </p>
+      </header>
+
+      {/* Difficulty + live status, as light individual pills rather than one boxed unit */}
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {ALL_DIFFICULTIES.map((d) => (
           <button
             key={d}
             type="button"
             onClick={() => newGame(d)}
             className={[
-              'rounded-full px-3 py-1.5 text-sm font-medium capitalize transition-colors sm:px-4',
-              d === difficulty ? 'bg-accent text-white' : 'text-ink/60 hover:text-ink',
+              'rounded-full border px-4 py-1.5 text-sm font-medium capitalize transition-colors',
+              d === difficulty
+                ? 'border-accent bg-accent text-white shadow-sm'
+                : 'border-grid/15 bg-surface text-ink/60 hover:border-accent/40 hover:text-ink',
             ].join(' ')}
           >
             {d}
@@ -153,17 +148,20 @@ function App() {
         ))}
       </div>
 
-      {/* Live game status, grouped as one unit rather than scattered */}
-      <div className="flex items-center gap-4 rounded-full border border-grid/10 bg-surface px-5 py-2 text-sm shadow-toolbar sm:gap-6">
-        <span className="flex items-center gap-1.5 font-mono tabular-nums text-ink/70" aria-label="Elapsed time">
+      <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+        <span className="font-mono tabular-nums text-ink/60" aria-label="Elapsed time">
           ⏱ {formatTime(seconds)}
         </span>
-        <span className="h-4 w-px bg-grid/15" aria-hidden="true" />
-        <span className="flex items-center gap-1.5 font-medium text-ink/70" aria-label="Score">
+        <span className="inline-flex items-center gap-1 rounded-full bg-accentSoft px-3 py-1 font-medium text-accent" aria-label="Score">
           ⭐ {score}
         </span>
-        <span className="h-4 w-px bg-grid/15" aria-hidden="true" />
-        <span className="flex items-center gap-1.5 font-medium text-ink/70" aria-label="Mistakes">
+        <span
+          className={[
+            'inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium',
+            mistakes > 0 ? 'bg-red-50 text-red-600' : 'bg-ink/5 text-ink/50',
+          ].join(' ')}
+          aria-label="Mistakes"
+        >
           ❌ {mistakes}/{maxMistakes}
         </span>
       </div>
@@ -179,51 +177,53 @@ function App() {
         onSelect={selectCell}
       />
 
-      {/* Compact action toolbar - visually secondary to the keypad below it */}
-      <div className="flex items-center gap-1 rounded-2xl border border-grid/10 bg-surface p-1.5 shadow-toolbar">
+      {/* Action toolbar - individual light pills, matching the difficulty row's visual weight */}
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <button
           type="button"
           onClick={undo}
           disabled={!canUndo}
-          title="Undo"
           className={[
-            'flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium transition-colors',
-            canUndo ? 'text-ink/70 hover:bg-accentSoft' : 'cursor-not-allowed text-ink/20',
+            'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+            canUndo
+              ? 'border-grid/15 bg-surface text-ink/70 hover:border-accent/40 hover:bg-accentSoft'
+              : 'cursor-not-allowed border-grid/10 text-ink/25',
           ].join(' ')}
         >
-          ↩ <span className="hidden sm:inline">Undo</span>
+          ↩ Undo
         </button>
         <button
           type="button"
           onClick={redo}
           disabled={!canRedo}
-          title="Redo"
           className={[
-            'flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium transition-colors',
-            canRedo ? 'text-ink/70 hover:bg-accentSoft' : 'cursor-not-allowed text-ink/20',
+            'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+            canRedo
+              ? 'border-grid/15 bg-surface text-ink/70 hover:border-accent/40 hover:bg-accentSoft'
+              : 'cursor-not-allowed border-grid/10 text-ink/25',
           ].join(' ')}
         >
-          ↪ <span className="hidden sm:inline">Redo</span>
+          ↪ Redo
         </button>
         <button
           type="button"
           onClick={toggleNotesMode}
           aria-pressed={isNotesMode}
-          title="Notes"
           className={[
-            'flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium transition-colors',
-            isNotesMode ? 'bg-accent text-white' : 'text-ink/70 hover:bg-accentSoft',
+            'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+            isNotesMode
+              ? 'border-accent bg-accent text-white shadow-sm'
+              : 'border-grid/15 bg-surface text-ink/70 hover:border-accent/40 hover:bg-accentSoft',
           ].join(' ')}
         >
-          ✏️ <span className="hidden sm:inline">Notes</span>
+          ✏️ Notes {isNotesMode ? 'On' : 'Off'}
         </button>
         <button
           type="button"
           onClick={useHint}
-          title="Hint"
-          className="flex h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-medium text-ink/70 transition-colors hover:bg-accentSoft"
+          className="rounded-full border border-grid/15 bg-surface px-4 py-1.5 text-sm font-medium text-ink/70 transition-colors hover:border-accent/40 hover:bg-accentSoft"
         >
-          💡 <span className="hidden sm:inline">Hint{hintsUsed > 0 ? ` (${hintsUsed})` : ''}</span>
+          💡 Hint {hintsUsed > 0 ? `(${hintsUsed})` : ''}
         </button>
       </div>
 
