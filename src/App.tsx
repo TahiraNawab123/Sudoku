@@ -140,7 +140,7 @@ function App() {
               'rounded-full border px-4 py-1.5 text-sm font-medium capitalize transition-colors',
               d === difficulty
                 ? 'border-accent bg-accent text-white shadow-sm'
-                : 'border-grid/15 bg-surface text-ink/60 hover:border-accent/40 hover:text-ink',
+                : 'border-grid/15 bg-surface text-ink/60 shadow-sm hover:border-accent/40 hover:text-ink',
             ].join(' ')}
           >
             {d}
@@ -149,16 +149,22 @@ function App() {
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-        <span className="font-mono tabular-nums text-ink/60" aria-label="Elapsed time">
+        <span
+          className="rounded-full border border-grid/15 bg-surface px-3 py-1 font-mono tabular-nums text-ink/60 shadow-sm"
+          aria-label="Elapsed time"
+        >
           ⏱ {formatTime(seconds)}
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-accentSoft px-3 py-1 font-medium text-accent" aria-label="Score">
+        <span
+          className="inline-flex items-center gap-1 rounded-full border border-accent/20 bg-accentSoft px-3 py-1 font-medium text-accent shadow-sm"
+          aria-label="Score"
+        >
           ⭐ {score}
         </span>
         <span
           className={[
-            'inline-flex items-center gap-1 rounded-full px-3 py-1 font-medium',
-            mistakes > 0 ? 'bg-red-50 text-red-600' : 'bg-ink/5 text-ink/50',
+            'inline-flex items-center gap-1 rounded-full border px-3 py-1 font-medium shadow-sm',
+            mistakes > 0 ? 'border-red-200 bg-red-50 text-red-600' : 'border-grid/15 bg-surface text-ink/50',
           ].join(' ')}
           aria-label="Mistakes"
         >
@@ -186,8 +192,8 @@ function App() {
           className={[
             'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
             canUndo
-              ? 'border-grid/15 bg-surface text-ink/70 hover:border-accent/40 hover:bg-accentSoft'
-              : 'cursor-not-allowed border-grid/10 text-ink/25',
+              ? 'border-grid/15 bg-surface text-ink/70 shadow-sm hover:border-accent/40 hover:bg-accentSoft'
+              : 'cursor-not-allowed border-grid/10 bg-surface/60 text-ink/30',
           ].join(' ')}
         >
           ↩ Undo
@@ -199,8 +205,8 @@ function App() {
           className={[
             'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
             canRedo
-              ? 'border-grid/15 bg-surface text-ink/70 hover:border-accent/40 hover:bg-accentSoft'
-              : 'cursor-not-allowed border-grid/10 text-ink/25',
+              ? 'border-grid/15 bg-surface text-ink/70 shadow-sm hover:border-accent/40 hover:bg-accentSoft'
+              : 'cursor-not-allowed border-grid/10 bg-surface/60 text-ink/30',
           ].join(' ')}
         >
           ↪ Redo
@@ -213,7 +219,7 @@ function App() {
             'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
             isNotesMode
               ? 'border-accent bg-accent text-white shadow-sm'
-              : 'border-grid/15 bg-surface text-ink/70 hover:border-accent/40 hover:bg-accentSoft',
+              : 'border-grid/15 bg-surface text-ink/70 shadow-sm hover:border-accent/40 hover:bg-accentSoft',
           ].join(' ')}
         >
           ✏️ Notes {isNotesMode ? 'On' : 'Off'}
@@ -221,7 +227,7 @@ function App() {
         <button
           type="button"
           onClick={useHint}
-          className="rounded-full border border-grid/15 bg-surface px-4 py-1.5 text-sm font-medium text-ink/70 transition-colors hover:border-accent/40 hover:bg-accentSoft"
+          className="rounded-full border border-grid/15 bg-surface px-4 py-1.5 text-sm font-medium text-ink/70 shadow-sm transition-colors hover:border-accent/40 hover:bg-accentSoft"
         >
           💡 Hint {hintsUsed > 0 ? `(${hintsUsed})` : ''}
         </button>
