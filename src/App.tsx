@@ -106,8 +106,7 @@ function App() {
   return (
     <div className="flex min-h-screen flex-col items-center gap-6 px-4 py-8 sm:py-10">
       {/* Minimal top-right nav - small and out of the way, doesn't compete with the title */}
-      <div className="flex w-full max-w-2xl justify-end gap-4 text-sm text-ink/50">
-        <button type="button" onClick={() => setShowLeaderboard(true)} className="hover:text-accent">
+       <div className="flex w-full max-w-5xl justify-end gap-4 text-sm text-ink/50">        <button type="button" onClick={() => setShowLeaderboard(true)} className="hover:text-accent">
           🏆 Leaderboard
         </button>
         {auth.user ? (
