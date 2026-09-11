@@ -30,8 +30,8 @@ function Board({ board, notes, selected, isGiven, isHint, isIncorrect, isCelebra
   const selectedValue = selected ? board[selected.row][selected.col] : 0
 
   return (
-    <div className="rounded-2xl border border-grid/10 bg-surface p-2.5 shadow-board sm:p-3.5">
-     <div className="grid w-full max-w-[min(96vw,64rem)] grid-cols-9 border-2 border-grid/50">
+    <div className="w-full max-w-xl rounded-2xl border border-grid/10 bg-surface p-2.5 shadow-board sm:p-4 lg:p-5">
+      <div className="grid w-full grid-cols-9 border-2 border-grid/55">
        {board.map((rowValues, row) =>
           rowValues.map((value, col) => (
             <Cell

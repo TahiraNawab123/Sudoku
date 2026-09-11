@@ -22,7 +22,7 @@ function Keypad({ board, onNumber, onErase }: KeypadProps) {
   const counts = countDigits(board)
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="grid w-full max-w-xl grid-cols-5 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-2.5">
       {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => {
         // A digit is "complete" once it's been placed 9 times — all its slots are filled.
         const isComplete = counts[n] >= 9
@@ -34,7 +34,7 @@ function Keypad({ board, onNumber, onErase }: KeypadProps) {
             onClick={() => onNumber(n)}
             aria-label={`Enter ${n}`}
             className={[
-              'flex h-11 w-11 items-center justify-center rounded-xl border text-lg font-medium transition-all sm:h-12 sm:w-12',
+              'flex h-12 w-full items-center justify-center rounded-xl border text-lg font-medium transition-all sm:size-12',
               isComplete
                 ? 'cursor-not-allowed border-grid/10 text-ink/15'
                 : 'border-grid/15 bg-surface text-ink shadow-sm hover:border-accent/40 hover:bg-accentSoft active:scale-95',
@@ -49,7 +49,7 @@ function Keypad({ board, onNumber, onErase }: KeypadProps) {
         type="button"
         onClick={onErase}
         aria-label="Erase selected cell"
-        className="flex h-11 items-center justify-center rounded-xl border border-grid/15 bg-surface px-3.5 text-sm font-medium text-ink/70 shadow-sm transition-all hover:border-accent/40 hover:bg-accentSoft active:scale-95 sm:h-12"
+        className="col-span-2 flex h-12 items-center justify-center rounded-xl border border-grid/15 bg-surface px-3.5 text-sm font-medium text-ink/70 shadow-sm transition-all hover:border-accent/40 hover:bg-accentSoft active:scale-95 sm:col-span-1 sm:h-12"
       >
         Erase
       </button>

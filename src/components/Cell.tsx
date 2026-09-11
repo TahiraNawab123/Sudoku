@@ -53,7 +53,7 @@ function Cell({
       aria-label={`Row ${row + 1}, column ${col + 1}${value ? `, value ${value}` : ', empty'}`}
       className={[
         'relative flex aspect-square w-full items-center justify-center',
-        'font-body text-xl sm:text-lxl',
+        'font-body text-xl sm:text-2xl lg:text-[1.7rem]',
         'border-grid/25 transition-colors duration-100',
         borderTop,
         borderLeft,

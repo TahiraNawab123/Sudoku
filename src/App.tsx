@@ -104,9 +104,9 @@ function App() {
   }, [setValue, clearCell, undo, redo, toggleNotesMode])
 
   return (
-    <div className="flex min-h-screen flex-col items-center gap-6 px-4 py-8 sm:py-10">
+    <div className="flex min-h-screen flex-col items-center gap-5 px-3 py-5 sm:gap-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Minimal top-right nav - small and out of the way, doesn't compete with the title */}
-       <div className="flex w-full max-w-5xl justify-end gap-4 text-sm text-ink/50">        <button type="button" onClick={() => setShowLeaderboard(true)} className="hover:text-accent">
+       <div className="flex w-full max-w-6xl justify-end gap-4 px-1 text-sm text-ink/50">        <button type="button" onClick={() => setShowLeaderboard(true)} className="hover:text-accent">
           🏆 Leaderboard
         </button>
         {auth.user ? (
@@ -122,7 +122,7 @@ function App() {
 
       {/* Hero: the game's identity, front and center */}
       <header className="text-center">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">Sudoku</h1>
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">Sudoku</h1>
         <p className="mt-1 text-sm text-ink/50">
           Click a cell, then type a number or use the keypad below.
         </p>
