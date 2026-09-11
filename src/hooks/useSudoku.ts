@@ -11,10 +11,8 @@ export interface CellPosition {
 const POINTS_PER_CORRECT_ENTRY = 145
 const MAX_MISTAKES = 3
 
-/** notes[row][col] is a sorted list of candidate numbers (1-9) pencilled into that cell. */
 export type Notes = number[][][]
 
-/** hints[row][col] is true if that cell's value was revealed via the Hint button. */
 export type HintGrid = boolean[][]
 
 interface Snapshot {
@@ -56,7 +54,6 @@ function cloneSnapshot(s: Snapshot): Snapshot {
 }
 
 export function useSudoku(initialDifficulty: Difficulty = 'medium') {
-  // Computed once, on first render only: either a previously saved game, or a fresh puzzle.
   const [initial] = useState(() => {
     const saved = loadGame()
     const savedGame =
@@ -127,10 +124,8 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
   const [isNotesMode, setIsNotesMode] = useState(false)
   const [hintsUsed, setHintsUsed] = useState(initial.hintsUsed)
 
-  /** The cell that most recently received a correct entry - briefly animated, then cleared. */
   const [celebrate, setCelebrate] = useState<CellPosition | null>(null)
 
-  // Undo/redo: `history` holds past snapshots (most recent last), `future` holds undone ones.
   const [history, setHistory] = useState<Snapshot[]>([])
   const [future, setFuture] = useState<Snapshot[]>([])
 
@@ -174,17 +169,15 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
 
   useEffect(() => {
     if (isFirstTimerRun.current) {
-      isFirstTimerRun.current = false // don't reset on mount - keep any restored time
+      isFirstTimerRun.current = false // don't reset on mount, just keep any restored time
     } else {
       setSeconds(0)
     }
     if (isSolved) return
     const id = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId])
 
-  // Auto-clear the "correct entry" celebration shortly after it starts.
   useEffect(() => {
     if (!celebrate) return
     const id = setTimeout(() => setCelebrate(null), 450)
@@ -212,13 +205,11 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
 
   const toggleNotesMode = useCallback(() => setIsNotesMode((v) => !v), [])
 
-  /** Pushes the current snapshot onto history and clears the redo stack. Call before any edit. */
   const pushHistory = useCallback((current: Snapshot) => {
     setHistory((prev) => [...prev, current])
     setFuture([])
   }, [])
 
-  /** Toggles a candidate number in the selected cell's pencil-mark notes. */
   const toggleNote = useCallback(
     (value: number) => {
       if (!selected) return
@@ -238,7 +229,6 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     [selected, isLocked, board, notes, hints, score, mistakes, state, pushHistory],
   )
 
-  /** Writes a value (1-9) into the selected cell — or toggles a note, if notes mode is on. */
   const setValue = useCallback(
     (value: number) => {
       if (isGameOver || isSolved) return
@@ -249,7 +239,7 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
       if (!selected) return
       const { row, col } = selected
       if (isLocked(row, col)) return
-      if (board[row][col] === value) return // no-op
+      if (board[row][col] === value) return // no op
 
       pushHistory(state)
       const nextBoard = cloneBoard(board)
@@ -282,7 +272,6 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     ],
   )
 
-  /** Clears the selected cell's value and notes, if it's editable. */
   const clearCell = useCallback(() => {
     if (isGameOver || isSolved) return
     if (!selected) return
@@ -300,10 +289,6 @@ export function useSudoku(initialDifficulty: Difficulty = 'medium') {
     setCelebrate(null)
   }, [isGameOver, isSolved, selected, isLocked, board, notes, hints, score, mistakes, state, pushHistory])
 
-  /**
-   * Reveals the correct value for the selected cell (or a random empty cell,
-   * if nothing usable is selected), locking it like a given cell.
-   */
   const useHint = useCallback(() => {
     if (isGameOver || isSolved) return
     let target = selected

@@ -17,19 +17,13 @@ function shuffledIndices(): number[] {
   return indices
 }
 
-/** Generates a complete, randomly-filled, valid Sudoku solution. */
 export function generateSolvedBoard(): Board {
   const board = createEmptyBoard()
   solveBoard(board, true) // randomizeOrder=true so results vary between calls
   return board
 }
 
-/**
- * Starting from a fully solved board, removes cells one at a time (in random
- * order) as long as the board keeps exactly one solution, stopping once the
- * target number of remaining clues is reached (or no more cells can safely
- * be removed).
- */
+
 function carvePuzzle(solved: Board, targetClues: number): Board {
   const puzzle = solved.map((row) => [...row])
   let cluesRemaining = TOTAL_CELLS

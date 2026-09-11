@@ -27,7 +27,7 @@ function Cell({
   isCelebrating,
   onSelect,
 }: CellProps) {
-  // Thicker borders every 3 cells to mark the 3x3 boxes, same subtle color throughout.
+  
   const borderTop = row % 3 === 0 ? 'border-t-2' : 'border-t'
   const borderLeft = col % 3 === 0 ? 'border-l-2' : 'border-l'
   const borderRight = col === 8 ? 'border-r-2' : ''

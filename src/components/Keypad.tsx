@@ -24,8 +24,8 @@ function Keypad({ board, onNumber, onErase }: KeypadProps) {
   return (
     <div className="grid w-full max-w-xl grid-cols-5 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-2.5">
       {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => {
-        // A digit is "complete" once it's been placed 9 times — all its slots are filled.
-        const isComplete = counts[n] >= 9
+
+const isComplete = counts[n] >= 9
         return (
           <button
             key={n}
